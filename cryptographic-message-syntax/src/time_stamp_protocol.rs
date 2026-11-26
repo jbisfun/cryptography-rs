@@ -152,7 +152,17 @@ impl From<TimeStampResp> for TimeStampResponse {
     }
 }
 
+/// No blocking HTTP in a browser build; signing without a time-stamp server works.
+#[cfg(target_family = "wasm")]
+pub fn time_stamp_request_http(
+    _url: impl IntoUrl,
+    _request: &TimeStampReq,
+) -> Result<TimeStampResponse, TimeStampError> {
+    Err(TimeStampError::Http("time-stamp servers are not available in the browser"))
+}
+
 /// Send a [TimeStampReq] to a server via HTTP.
+#[cfg(not(target_family = "wasm"))]
 pub fn time_stamp_request_http(
     url: impl IntoUrl,
     request: &TimeStampReq,
